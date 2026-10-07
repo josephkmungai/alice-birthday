@@ -403,8 +403,8 @@ for(let i = 0; i < starCount; i++){
 /* ── COUNTDOWN ── */
 function getNextBirthday(){
   const now = new Date();
-  const thisYear = new Date(now.getFullYear(), 4, 2); // May 2
-  return now < thisYear ? thisYear : new Date(now.getFullYear()+1, 4, 2);
+  const thisYear = new Date(now.getFullYear(), 4, 2); // May 29
+  return now < thisYear ? thisYear : new Date(now.getFullYear()+1, 4, 29);
 }
 
 const daysEl    = document.getElementById('days');
