@@ -403,8 +403,8 @@ for(let i = 0; i < starCount; i++){
 /* ── COUNTDOWN ── */
 function getNextBirthday(){
   const now = new Date();
-  const thisYear = new Date(now.getFullYear(), 11, 29); // Nov 29
-  return now < thisYear ? thisYear : new Date(now.getFullYear()+1, 4, 29);
+  const thisYear = new Date(now.getFullYear(), 10, 29); // Nov 29
+  return now < thisYear ? thisYear : new Date(now.getFullYear()+1, 10, 29);
 }
 
 const daysEl    = document.getElementById('days');
@@ -431,7 +431,7 @@ let redirected = false;
 function smoothRedirect(){
   if(redirected) return;
   redirected = true;
-
+  
   // 1. Burst hearts for ~1.5s
   burstHearts();
 
