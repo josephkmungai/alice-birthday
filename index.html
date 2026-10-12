@@ -625,272 +625,556 @@ h1{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font
 
 
 <script>
+
   /* ── SECURITY ── */
-/* ── SECURITY ── */
+
   async function checkHash(input,hash){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(input));const hex=Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');return hex===hash;}
-  const SECRET_HASH = '99770ab7d81a953e5e54d896b864d4b291d9a5da799298ffcb93318b76c8c505';
-  const UNLOCK_HASH = '99770ab7d81a953e5e54d896b864d4b291d9a5da799298ffcb93318b76c8c505';
+
+  const SECRET_HASH = '33275a8aa48ea918bd53a9181aa975f15ab0d0645398f5918a006d08675c1cb27d5c645dbd084eee56e675e25ba4019f2ecea37ca9e2995b49fcb12c096a032e';
+
+  const UNLOCK_HASH = 'c6001d5b2ac3df314204a8f9d7a00e1503c9aba0fd4538645de4bf4cc7e2555cfe9ff9d0236bf327ed3e907849a98df4d330c4bea551017d465b4c1d9b80bcb0';
+
   const YOUR_WHATSAPP = '254714066258'; // ← PUT YOUR NUMBER HERE (with country code, no + or spaces)
 
+
+
   let pinEntry = '', isSecret = false, noCount = 0;
-  
+
+
+
+  /* NUMPAD */
+
+  function numPress(n){ if(pinEntry.length>=4)return; pinEntry+=n; updateDots(); if(pinEntry.length===4)checkCode(); }
+
+  function numDelete(){ pinEntry=pinEntry.slice(0,-1); updateDots(); document.getElementById('lockError').textContent=''; }
+
+  function updateDots(){ for(let i=0;i<4;i++) document.getElementById('dot'+i).classList.toggle('filled',i<pinEntry.length); }
+
+  async function checkCode(){
+
+    const match = await checkHash(pinEntry, SECRET_HASH);
+
+    if(match){ goSecret(); }
+
+    else{ document.getElementById('lockError').textContent='✗ Wrong code — try again'; pinEntry=''; updateDots(); setTimeout(()=>document.getElementById('lockError').textContent='',2000); }
+
+  }
+
+
+
   /* PAGE TRANSITIONS */
+
   function goSecret(){
+
     document.getElementById('lockScreen').classList.add('fade-out');
+
     setTimeout(()=>{
+
       document.getElementById('lockScreen').style.display='none';
+
       document.getElementById('publicPage').classList.remove('active');
+
       document.getElementById('secretPage').classList.add('active');
+
       document.getElementById('backBtn').classList.add('show');
+
       document.getElementById('loginBtnPublic').style.display='none';
+
       document.getElementById('loginBtnSecret').style.display='block';
+
       document.getElementById('musicFab').classList.add('secret-mode');
+
       document.querySelector('.petal-field').style.display='none';
+
       isSecret=true; spawnSecretPetals(); initSecretObserver(); secretCelebrate(); playSec();
+
       showToast('🔒 Welcome, Alice 💕 This is just for you!',true);
+
     },800);
+
   }
+
   function goPublicFromLock(){
+
     document.getElementById('lockScreen').classList.add('fade-out');
+
     setTimeout(()=>{
+
       document.getElementById('lockScreen').style.display='none';
+
       document.getElementById('publicPage').classList.add('active');
+
       document.getElementById('loginBtnPublic').style.display='block';
+
       initPublicObserver(); spawnPublicPetals(); playPub();
+
     },500);
+
   }
+
   function goLogin(){
+
     stopPub(); stopSec(); stopYes();
+
     document.getElementById('publicPage').classList.remove('active');
+
     document.getElementById('secretPage').classList.remove('active');
+
     document.getElementById('backBtn').classList.remove('show');
+
     document.getElementById('loginBtnPublic').style.display='none';
+
     document.getElementById('loginBtnSecret').style.display='none';
+
     document.getElementById('musicFab').classList.remove('secret-mode');
+
     document.querySelector('.petal-field').style.display='none';
+
     isSecret=false; pinEntry=''; updateDots(); document.getElementById('lockError').textContent='';
+
     const ls=document.getElementById('lockScreen'); ls.style.display='flex'; ls.classList.remove('fade-out'); ls.style.opacity='1';
+
   }
+
   function goPublic(){
+
     document.getElementById('secretPage').classList.remove('active');
+
     document.getElementById('publicPage').classList.add('active');
+
     document.getElementById('backBtn').classList.remove('show');
+
     document.getElementById('loginBtnSecret').style.display='none';
+
     document.getElementById('loginBtnPublic').style.display='block';
+
     document.getElementById('musicFab').classList.remove('secret-mode');
+
     document.querySelector('.petal-field').style.display='block';
+
     stopSec(); stopYes(); playPub(); isSecret=false; showToast('Back to the fan page 🌸');
+
   }
+
+
 
   /* PETALS */
+
   function spawnPublicPetals(){ const f=document.getElementById('petalField'); for(let i=0;i<28;i++){const p=document.createElement('div');p.className='petal';p.style.cssText=`left:${Math.random()*100}%;animation-delay:${Math.random()*18}s;animation-duration:${8+Math.random()*10}s;transform:scale(${0.6+Math.random()*1}) rotate(${Math.random()*180}deg);opacity:0;`;f.appendChild(p);} }
+
   spawnPublicPetals();
+
   function spawnSecretPetals(){ const f=document.getElementById('secretPetalField'); for(let i=0;i<22;i++){const p=document.createElement('div');p.className='petal-s';p.style.cssText=`left:${Math.random()*100}%;animation-delay:${Math.random()*18}s;animation-duration:${9+Math.random()*10}s;transform:scale(${0.6+Math.random()*1}) rotate(${Math.random()*180}deg);opacity:0;`;f.appendChild(p);} }
 
+
+
   /* OBSERVERS */
+
   function initPublicObserver(){
+
     const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(!e.isIntersecting)return;if(e.target.id==='wishesGrid'){[...e.target.children].forEach((c,i)=>setTimeout(()=>c.classList.add('visible'),i*150));}else e.target.classList.add('visible');obs.unobserve(e.target);});},{threshold:0.15});
+
     ['letterCard','wishesGrid'].forEach(id=>{const el=document.getElementById(id);if(el)obs.observe(el);});
+
   }
+
   initPublicObserver();
+
   function initSecretObserver(){
+
     const obs2=new IntersectionObserver(entries=>{entries.forEach(e=>{if(!e.isIntersecting)return;if(e.target.id==='reasonsGrid'){[...e.target.children].forEach((c,i)=>setTimeout(()=>c.classList.add('visible'),i*130));}else e.target.classList.add('visible');obs2.unobserve(e.target);});},{threshold:0.12});
+
     ['secretLetterCard','reasonsGrid','bffCard'].forEach(id=>{const el=document.getElementById(id);if(el)obs2.observe(el);});
+
   }
+
+
 
   /* TOAST */
+
   function showToast(msg,secret=false){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast'+(secret?' st':''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
 
+
+
   /* CONFETTI */
+
   function burstConfetti(colors){
+
     colors=colors||['#c2495a','#c9a96e','#f2d0d7','#e8849a','#ffd700','#ff9eb5'];
+
     for(let i=0;i<60;i++){const dot=document.createElement('div');dot.className='confetti-piece';const angle=(Math.PI*2/60)*i,dist=120+Math.random()*160;dot.style.setProperty('--tx',`${Math.cos(angle)*dist}px`);dot.style.setProperty('--ty',`${Math.sin(angle)*dist-80}px`);dot.style.background=colors[Math.floor(Math.random()*colors.length)];dot.style.width=dot.style.height=`${5+Math.random()*7}px`;dot.style.borderRadius=Math.random()>.5?'50%':'2px';document.body.appendChild(dot);setTimeout(()=>dot.remove(),1300);}
+
   }
+
   function secretConfetti(){ burstConfetti(['#8b1a3a','#d4a043','#f5c4d0','#5a0f22','#e8849a','#c9a96e']); showToast('🎊 Celebrating you, Alice!',true); }
 
+
+
   /* CELEBRATE */
+
   function celebrate(){ const f=document.getElementById('petalField'); for(let i=0;i<15;i++){setTimeout(()=>{const p=document.createElement('div');p.className='petal';p.style.cssText=`left:${Math.random()*100}%;animation-delay:0s;animation-duration:${3+Math.random()*3}s;transform:scale(${0.8+Math.random()*1.2}) rotate(${Math.random()*180}deg);opacity:0;`;f.appendChild(p);setTimeout(()=>p.remove(),6000);},i*80);} showToast('🌹 Showering Alice with love!'); }
+
   function secretCelebrate(){ const f=document.getElementById('secretPetalField'); if(!f)return; for(let i=0;i<18;i++){setTimeout(()=>{const p=document.createElement('div');p.className='petal-s';p.style.cssText=`left:${Math.random()*100}%;animation-delay:0s;animation-duration:${3+Math.random()*3}s;transform:scale(${0.8+Math.random()*1.2}) rotate(${Math.random()*180}deg);opacity:0;`;f.appendChild(p);setTimeout(()=>p.remove(),6000);},i*80);} showToast('🌹 Our secret celebration! 💕',true); }
 
+
+
   /* FAN CHOICE */
+
   function fanChoice(type){
+
     document.getElementById('fanDance').classList.remove('show');
+
     document.getElementById('fanSing').classList.remove('show');
+
     if(type==='dance'){ document.getElementById('fanDance').classList.add('show'); burstConfetti(); showToast('💃 Dance it out for Alice!'); }
+
     else { document.getElementById('fanSing').classList.add('show'); burstConfetti(); showToast('🎶 Sing it for Alice!'); }
+
   }
+
+
 
   /* HEART TRAIL */
+
   document.addEventListener('click',function(e){ if(e.target.closest('button')||e.target.closest('.num-btn'))return; spawnHeart(e.clientX,e.clientY); });
+
   function spawnHeart(x,y){ const h=['💕','🌹','✨','💗','🌸']; const el=document.createElement('div'); el.className='heart-trail'; el.textContent=h[Math.floor(Math.random()*h.length)]; el.style.left=x+'px'; el.style.top=y+'px'; document.body.appendChild(el); setTimeout(()=>el.remove(),900); }
+
   function sendHeartBtn(btn){ const r=btn.getBoundingClientRect(); for(let i=0;i<5;i++) setTimeout(()=>spawnHeart(r.left+r.width/2+(Math.random()-.5)*40,r.top-10),i*80); showToast(isSecret?'💕 Sending all my love to Alice!':'💕 Sending love to Alice!',isSecret); }
+
   function sendHeartFromWishes(){ const btns=document.querySelectorAll('.btn-round'); if(btns.length)sendHeartBtn(btns[Math.floor(Math.random()*btns.length)]); }
 
+
+
   /* SCROLL */
+
   function scrollToLetter(){ document.getElementById('letterCard').scrollIntoView({behavior:'smooth',block:'center'}); showToast('💌 A message for Alice…'); }
+
   function scrollToSecretLetter(){ document.getElementById('secretLetterCard').scrollIntoView({behavior:'smooth',block:'center'}); showToast('💌 Your private letter, Alice 🔒',true); }
 
+
+
   /* COPY */
+
   function copyWish(){ navigator.clipboard.writeText("Dear Alice,\n\nOn this beautiful day, I want you to know how rare and wonderful you truly are.\n\nHappy Birthday! 💕").then(()=>showToast('📋 Wish copied! 💕')); }
+
   function copySecretWish(){ navigator.clipboard.writeText("My dearest Alice,\n\nNo one else gets to read this. You are someone I think about when the day is quiet and the world goes still.\n\nHappy Birthday, Alice. From the one who thinks the world of you. 🌹").then(()=>showToast('📋 Saved! 💕',true)); }
+
   function copyBffMsg(){
+
     const base = document.getElementById('bffMessage').textContent;
+
     const extra = document.getElementById('bffExtraNote').value.trim();
+
     const full = extra ? base + '\n\n' + extra : base;
+
     navigator.clipboard.writeText(full).then(()=>showToast('📋 Message copied! 💕',true));
+
   }
+
+
 
   /* SHARE */
+
   function shareWish(){ if(navigator.share){ navigator.share({title:'Happy Birthday Alice! 💕',text:'A special birthday page for Alice 🌹',url:window.location.href});}else{ navigator.clipboard.writeText(window.location.href).then(()=>showToast('🔗 Link copied! 💕'));} }
 
+
+
   /* ── BFF QUESTION ── */
+
   function bffYes(){
+
     document.getElementById('bffMainBtns').style.display='none';
+
     document.getElementById('bffNoPanel').classList.remove('show');
+
     document.getElementById('bffYesPanel').classList.add('show');
+
     burstConfetti(['#8b1a3a','#d4a043','#f5c4d0','#e8849a','#ffd700']);
+
     secretCelebrate();
+
     showToast('💕 SHE SAID YES! 🌹',true); playYes();
+
     setTimeout(()=>{ document.getElementById('happyScene').classList.add('show'); burstConfetti(['#8b1a3a','#d4a043','#f5c4d0','#e8849a','#ffd700']); burstConfetti(); },800);
+
   }
+
+
 
   function bffChangeToYes(){
+
     document.getElementById('bffNoPanel').classList.remove('show');
+
     bffYes();
+
   }
+
+
 
   function bffNo(){
+
     document.getElementById('bffMainBtns').style.display='none';
+
     document.getElementById('bffNoPanel').classList.add('show');
+
     showToast('😳 Are you sure, Alice…?',true);
+
   }
+
+
 
   function bffInsistNo(){
+
     // Lock her out with crying animation
+
     document.getElementById('secretPage').classList.remove('active');
+
     document.getElementById('loginBtnSecret').style.display='none';
+
     document.getElementById('backBtn').classList.remove('show');
+
     document.getElementById('lockedOut').classList.add('show');
+
     isSecret=false;
+
     showToast('💔 The page has locked out of heartbreak…',true);
+
   }
+
+
 
  
+
   <!-- Replace values below -->
 
+
+
 const RECIPIENT_PHONE = '+254714066258'; // digits only, country code + number, no + or spaces
+
 const RECIPIENT_WEBSITE = 'https://whatsapp.com';
 
+
+
 function formatPhoneForWa(phone) {
+
   return phone.replace(/\D/g, '');
+
 }
+
+
 
 function showToast(msg, autoHide = true) {
+
   console.log(msg);
+
   // implement your UI toast if desired
+
 }
+
+
 
 async function sendToWhatsApp() {
+
   const extra = document.getElementById('bffExtraNote')?.value.trim() || '';
+
   const base = document.getElementById('bffMessage')?.value || '';
+
   const full = (base.trim() === '' && extra === '') ? '' : (extra ? base + '\n\n' + extra : base);
+
   if (!full) {
+
     showToast('Please enter a message before sending.');
+
     return;
+
   }
+
+
 
   const phone = formatPhoneForWa(RECIPIENT_PHONE);
+
   const encoded = encodeURIComponent(full);
 
+
+
   // Prefer whatsapp:// (mobile app). If that fails, open web.whatsapp.com fallback.
+
   const appUrl = `whatsapp://send?phone=${phone}&text=${encoded}`;
+
   const webUrl = `https://wa.me/${phone}?text=${encoded}`;
+
   const fallbackUrl = RECIPIENT_WEBSITE;
 
+
+
   // Try opening WhatsApp app first using an iframe/timer trick for browsers that support it.
+
   let opened = false;
+
   const openApp = () => {
+
     const iframe = document.createElement('iframe');
+
     iframe.style.display = 'none';
+
     iframe.src = appUrl;
+
     document.body.appendChild(iframe);
+
     setTimeout(() => { document.body.removeChild(iframe); }, 1500);
+
   };
 
+
+
   // Start timer to open web fallback if app didn't open
+
   const timer = setTimeout(() => {
+
     if (!opened) {
+
       // Open web WhatsApp
+
       window.open(webUrl, '_blank');
+
       showToast('Opening WhatsApp Web…', true);
+
     }
+
   }, 1200);
 
+
+
   try {
+
     openApp();
+
     // Also attempt window.location for some environments
+
     // If successful, mark opened and clear timer
+
     setTimeout(() => {
+
       opened = true;
+
       clearTimeout(timer);
+
       showToast('Opening WhatsApp app…', true);
+
       // For safety, also open web in a new tab if app didn't capture
+
       window.open(webUrl, '_blank');
+
     }, 900);
+
   } catch (e) {
+
     clearTimeout(timer);
+
     // final fallback: open recipient website
+
     window.open(fallbackUrl, '_blank');
+
     showToast('Could not open WhatsApp — opening website instead.', true);
+
   }
+
 }
+
+
+
 
 
   /* UNLOCK FROM LOCKED OUT */
+
   function tryUnlock(v){ if(v.length===4) checkUnlock(); }
+
   async function checkUnlock(){
+
     const val=document.getElementById('unlockInput').value.trim();
+
     const match = await checkHash(val, UNLOCK_HASH);
+
     if(match){
+
       document.getElementById('lockedOut').classList.remove('show');
+
       document.getElementById('unlockInput').value='';
+
       document.getElementById('unlockError').textContent='';
+
       // Reset bff section and go back to secret page at bff question
+
       document.getElementById('bffMainBtns').style.display='flex';
+
       document.getElementById('bffYesPanel').classList.remove('show');
+
       document.getElementById('bffNoPanel').classList.remove('show');
+
       noCount=0;
+
       // Return to secret page
+
       document.getElementById('secretPage').classList.add('active');
+
       document.getElementById('backBtn').classList.add('show');
+
       document.getElementById('loginBtnSecret').style.display='block';
+
       document.getElementById('musicFab').classList.add('secret-mode');
+
       isSecret=true;
+
       // Scroll to the bff section
+
       setTimeout(()=>{
+
         document.getElementById('bffSection').scrollIntoView({behavior:'smooth', block:'center'});
+
       }, 300);
+
       showToast('🔑 Unlocked! Try again, Alice 💕', true);
+
     } else {
+
       document.getElementById('unlockError').textContent='✗ Wrong key — try again';
+
       setTimeout(()=>document.getElementById('unlockError').textContent='',2000);
+
     }
+
   }
 
+
+
   /* HAPPY SCENE */
+
   function closeHappyScene(){ document.getElementById('happyScene').classList.remove('show'); }
 
+
+
  
+
+
+
+
 
 
 
   /* MUSIC */
+
   function playPub(){ var a=document.getElementById('pubSong'); a.volume=0.4; a.play().catch(function(){}); }
+
   function stopPub(){ document.getElementById('pubSong').pause(); }
+
   function playSec(){ stopPub(); var a=document.getElementById('secSong'); a.volume=0.4; a.play().catch(function(){}); }
+
   function stopSec(){ document.getElementById('secSong').pause(); }
+
   function playYes(){ stopSec(); var a=document.getElementById('yesSong'); a.volume=0.45; a.play().catch(function(){}); }
+
   function stopYes(){ document.getElementById('yesSong').pause(); }
+
 </script>
-</body>
 </html>
