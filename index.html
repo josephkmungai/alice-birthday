@@ -626,12 +626,13 @@ h1{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font
 
 <script>
   /* ── SECURITY ── */
-/* ── SECURITY (Plain Text Mode) ── */
-  function checkHash(input, code) {
-    return input === code;
-  }
-  const SECRET_HASH = '1234'; // Replace with your plain-text secret code
-  const UNLOCK_HASH = '0000'; // Replace with your plain-text unlock code
+/* ── SECURITY ── */
+  async function checkHash(input,hash){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(input));const hex=Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');return hex===hash;}
+  const SECRET_HASH = '99770ab7d81a953e5e54d896b864d4b291d9a5da799298ffcb93318b76c8c505';
+  const UNLOCK_HASH = '99770ab7d81a953e5e54d896b864d4b291d9a5da799298ffcb93318b76c8c505';
+  const YOUR_WHATSAPP = '254714066258'; // ← PUT YOUR NUMBER HERE (with country code, no + or spaces)
+
+  let pinEntry = '', isSecret = false, noCount = 0;
   
   /* PAGE TRANSITIONS */
   function goSecret(){
