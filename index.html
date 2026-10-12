@@ -626,22 +626,10 @@ h1{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font
 
 <script>
   /* ── SECURITY ── */
-  async function checkHash(input,hash){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(input));const hex=Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');return hex===hash;}
-  const SECRET_HASH = '33275a8aa48ea918bd53a9181aa975f15ab0d0645398f5918a006d08675c1cb27d5c645dbd084eee56e675e25ba4019f2ecea37ca9e2995b49fcb12c096a032e';
-  const UNLOCK_HASH = 'c6001d5b2ac3df314204a8f9d7a00e1503c9aba0fd4538645de4bf4cc7e2555cfe9ff9d0236bf327ed3e907849a98df4d330c4bea551017d465b4c1d9b80bcb0';
-  const YOUR_WHATSAPP = '254714066258'; // ← PUT YOUR NUMBER HERE (with country code, no + or spaces)
-
-  let pinEntry = '', isSecret = false, noCount = 0;
-
-  /* NUMPAD */
-  function numPress(n){ if(pinEntry.length>=4)return; pinEntry+=n; updateDots(); if(pinEntry.length===4)checkCode(); }
-  function numDelete(){ pinEntry=pinEntry.slice(0,-1); updateDots(); document.getElementById('lockError').textContent=''; }
-  function updateDots(){ for(let i=0;i<4;i++) document.getElementById('dot'+i).classList.toggle('filled',i<pinEntry.length); }
-  async function checkCode(){
-    const match = await checkHash(pinEntry, SECRET_HASH);
-    if(match){ goSecret(); }
-    else{ document.getElementById('lockError').textContent='✗ Wrong code — try again'; pinEntry=''; updateDots(); setTimeout(()=>document.getElementById('lockError').textContent='',2000); }
-  }
+ /* ── SECURITY (Plain Text Mode) ── */
+async function checkHash(input, code) { return input === code; }
+  const SECRET_HASH = '1234'; // Put your normal secret code here
+const UNLOCK_HASH = '0000'; // Put your normal unlock code here
 
   /* PAGE TRANSITIONS */
   function goSecret(){
