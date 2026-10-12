@@ -626,11 +626,13 @@ h1{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font
 
 <script>
   /* ── SECURITY ── */
- /* ── SECURITY (Plain Text Mode) ── */
-async function checkHash(input, code) { return input === code; }
-  const SECRET_HASH = '1234'; // Put your normal secret code here
-const UNLOCK_HASH = '0000'; // Put your normal unlock code here
-
+/* ── SECURITY (Plain Text Mode) ── */
+  function checkHash(input, code) {
+    return input === code;
+  }
+  const SECRET_HASH = '1234'; // Replace with your plain-text secret code
+  const UNLOCK_HASH = '0000'; // Replace with your plain-text unlock code
+  
   /* PAGE TRANSITIONS */
   function goSecret(){
     document.getElementById('lockScreen').classList.add('fade-out');
